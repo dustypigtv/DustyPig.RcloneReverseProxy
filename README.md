@@ -33,3 +33,38 @@ server {
     }
 }
 ```
+
+## Example rclone service:
+
+```
+[Unit]
+Description=RClone Dropbox
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/rclone serve http DPMedia: --addr 127.0.0.1:8080 --read-only --config=/home/jd/.config/rclone/rclone.conf
+Restart=on-abort
+
+[Install]
+WantedBy=default.target
+```
+
+## Example server service:
+
+```
+[Unit]
+Description=Dusty Pig Rclone Reverse Proxy
+After=network-online.target
+
+[Service]
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=DUSTY_PIG_RCLONE_KEY=abcde12345
+WorkingDirectory=/etc/DustyPig.RcloneReverseProxy
+ExecStart=/etc/DustyPig.RcloneReverseProxy/DustyPig.RcloneReverseProxy --urls http://localhost:7890
+KillSignal=SIGINT
+Restart=on-abort
+User=www-data
+
+[Install]
+WantedBy=default.target
+```

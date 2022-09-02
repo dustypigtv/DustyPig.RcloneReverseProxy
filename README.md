@@ -13,8 +13,11 @@ server {
 	server_name example.com;
 
 	location / {
+		limit_except GET HEAD {
+			deny  all;
+		}
 		auth_request /auth;
-		auth_request_set rclone_path $upstream_http_rclone_path;
+		auth_request_set $rclone_path $upstream_http_rclone_path;
 		proxy_buffering off;
 		proxy_pass http://127.0.0.1:8080/$rclone_path;
 		proxy_pass_request_body off;
@@ -23,7 +26,7 @@ server {
 	
 	location = /auth {
 		internal;
-		proxy_pass http://localhost:7890/tokens;
+		proxy_pass http://localhost:7890/auth;
 		proxy_pass_request_body off;
 		proxy_set_header Content-Length "";
 		proxy_set_header X-Original-URI $request_uri;

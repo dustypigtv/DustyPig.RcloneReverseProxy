@@ -1,0 +1,32 @@
+name: Release
+on:
+  workflow_dispatch:
+    branches: [ master ]
+    
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with: 
+          dotnet-version: 6.0.x
+
+      - name: Build Server
+        run: |
+            sed -i "s/\(<Version>\([0-9]\+\.\)\{3\}\)\([0-9]\+\)/\1${{github.run_number}}/" "DustyPig.RcloneReverseProxy/DustyPig.RcloneReverseProxy.csproj"
+            dotnet publish -c release -p:PublishProfile=FolderProfile -o publish
+            zip -rm9j DustyPig.RcloneReverseProxy.zip publish
+
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+            repo_token: "${{ secrets.GITHUB_TOKEN }}"
+            prerelease: false
+            files: DustyPig.RcloneReverseProxy.zip
+            automatic_release_tag: v1.0.0.${{github.run_number}}
+        

@@ -1,6 +1,7 @@
 using Krypto.WonderDog;
 using Krypto.WonderDog.Symmetric;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace DustyPig.RcloneReverseProxy.Server.Controllers
 {
@@ -32,7 +33,7 @@ namespace DustyPig.RcloneReverseProxy.Server.Controllers
         {
             //Don't catch exceptions - if it fails, let nginx deny the request
 
-
+            
             //Get the query params
             var query = Request.Headers["X-Original-URI"][0];
             query = query.Substring(query.IndexOf("?") + 1);
@@ -45,18 +46,20 @@ namespace DustyPig.RcloneReverseProxy.Server.Controllers
 
             //Get the file param
             var encFile = queryParams.First(item => item.Key.Equals("file", StringComparison.CurrentCultureIgnoreCase)).Value;
-
+            
             //Restore the correct base64
-            encFile = encFile.Replace("_", "/");
+            encFile = WebUtility.UrlDecode(encFile);
 
-            var decFile = _aes.Decrypt(_key, encFile);
+            //Decrypt the filename
+            var decFile = _aes.Decrypt(_key, encFile);           
 
             //Make sure the file is allowed
-            var ext = Path.GetExtension(encFile).ToLower();
+            var ext = Path.GetExtension(decFile).ToLower();
             if (!ALLOWED_EXTENSIONS.Any(item => item == ext))
                 throw new Exception("Invalid file");
 
 
+            //Tell nginx the file path
             Response.Headers.Add("rclone_path", decFile);
 
             return Ok();

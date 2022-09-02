@@ -45,6 +45,10 @@ namespace DustyPig.RcloneReverseProxy.Server.Controllers
 
             //Get the file param
             var encFile = queryParams.First(item => item.Key.Equals("file", StringComparison.CurrentCultureIgnoreCase)).Value;
+
+            //Restore the correct base64
+            encFile = encFile.Replace("_", "/");
+
             var decFile = _aes.Decrypt(_key, encFile);
 
             //Make sure the file is allowed

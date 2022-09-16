@@ -26,7 +26,7 @@ server {
 	
 	location = /auth {
 		internal;
-		proxy_pass http://localhost:7890/auth;
+		proxy_pass http://127.0.0.1:7890/auth;
 		proxy_pass_request_body off;
 		proxy_set_header Content-Length "";
 		proxy_set_header X-Original-URI $request_uri;
